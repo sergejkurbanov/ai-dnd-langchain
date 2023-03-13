@@ -1,3 +1,41 @@
+import tmi, { ChatUserstate } from 'tmi.js'
+
+export const connectTwitchChat = () => {
+  // Define configuration options
+  const opts = { channels: ['sirgg_tv'] }
+
+  // Create a client with our options
+  const client = new tmi.client(opts)
+
+  // Register our event handlers (defined below)
+  client.on('message', onMessageHandler)
+  client.on('connected', onConnectedHandler)
+
+  // Connect to Twitch:
+  client.connect()
+
+  // Called every time a message comes in
+  function onMessageHandler(
+    channel: string,
+    userstate: ChatUserstate,
+    message: string,
+    self: boolean,
+  ) {
+    console.log(
+      'channel, userstate, messsage, self :>> ',
+      channel,
+      userstate,
+      message,
+      self,
+    )
+  }
+
+  // Called every time the bot connects to Twitch chat
+  function onConnectedHandler(addr: string, port: number) {
+    console.log(`* Connected to ${addr}:${port}`)
+  }
+}
+
 const getTwitchToken = async () => {
   const res = await fetch('https://id.twitch.tv/oauth2/token', {
     method: 'POST',
