@@ -1,20 +1,19 @@
 import express, { Express, Request, Response } from 'express'
 import { createServer } from 'http'
-import * as dotenv from 'dotenv'
-import cors from 'cors'
 import { Server } from 'socket.io'
+import cors from 'cors'
+
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 import GameManager from './GameManager.js'
 
 // Setup
-dotenv.config()
 const app: Express = express()
 app.use(cors())
 app.use(express.json())
 const httpServer = createServer(app)
-const io = new Server(httpServer, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
-})
+const io = new Server(httpServer, { cors: { origin: '*' } })
 const gameInstance = GameManager(io)
 
 io.on('connection', (socket) => {
@@ -24,10 +23,10 @@ io.on('connection', (socket) => {
     console.log('user disconnected')
   })
 
-  socket.on('newPlayerChoice', (newPlayerChoice) => {
-    console.log('New player choice :>> ', newPlayerChoice)
-    gameInstance.generateNextScene(newPlayerChoice)
-  })
+  // socket.on('newPlayerChoice', (newPlayerChoice) => {
+  //   console.log('New player choice :>> ', newPlayerChoice)
+  //   gameInstance.generateNextScene(newPlayerChoice)
+  // })
 })
 
 app.get('/', async (req: Request, res: Response) => {

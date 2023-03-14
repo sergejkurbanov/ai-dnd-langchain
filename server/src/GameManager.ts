@@ -2,7 +2,7 @@ import { Server } from 'socket.io'
 
 import { callChatGPT } from './langchain.js'
 import { generateSDImage } from './helpers.js'
-import { connectTwitchChat } from './twitch.js'
+import { createTwitchChat, VoteOptions } from './twitch.js'
 
 const systemMessage = `You are a text-based role-playing Dungeons & Dragons (D&D 5E) engine. You play out a single quest in exactly 15 scenes. A scene consists of a description and 3 action choices. You always start and end in the tavern of city Aenys.
 
@@ -41,14 +41,50 @@ You can only respond with JSON in this format and nothing else: { "currentSceneA
 const quest =
   'Begin quest: Aldor, a human in the tavern, told you to investigate a nearby ruin where he lost his golden pocket watch. It is rumored skeletons have been spotted there. You head out.'
 
-function GameManager(io: Server) {
+const GameManager = (io: Server) => {
   console.log('Game manager initialized')
   const history: string[] = []
+  let options: string[] = []
+  const twitchChat = createTwitchChat(io)
 
-  const start = () => {
+  const start = async () => {
     console.log('game started')
-    // generateNextScene(quest)
-    connectTwitchChat()
+    await generateNextScene(quest)
+    twitchChat.connect()
+    runGameLoop()
+  }
+
+  const runGameLoop = () => {
+    console.log('Running game loop')
+
+    // Vote time interval
+    let timeLeft = 20
+    const timeLeftInterval = setInterval(async () => {
+      timeLeft -= 1
+      io.sockets.emit('updateTimeLeft', timeLeft)
+
+      // stop the interval and reset the game loop when time runs out
+      if (timeLeft <= 0) {
+        const votes = twitchChat.getVotes()
+        console.log('votes :>> ', votes, options)
+
+        let maxVoteIndex
+        if (votes.a > votes.b && votes.a > votes.c) {
+          maxVoteIndex = 0
+        } else if (votes.b > votes.a && votes.b > votes.c) {
+          maxVoteIndex = 1
+        } else if (votes.c > votes.a && votes.c > votes.b) {
+          maxVoteIndex = 2
+        } else {
+          maxVoteIndex = 0
+        }
+        console.log(maxVoteIndex)
+        clearInterval(timeLeftInterval)
+        await generateNextScene(options[maxVoteIndex])
+        twitchChat.resetVotes()
+        runGameLoop()
+      }
+    }, 1000)
   }
 
   const generateNextScene = async (playerChoice: string) => {
@@ -60,6 +96,7 @@ function GameManager(io: Server) {
     const sdImage = await generateSDImage(json.dallePrompt)
 
     history.push(text)
+    options = json.options
     io.sockets.emit('updateGameState', {
       description: json.description,
       options: json.options,
