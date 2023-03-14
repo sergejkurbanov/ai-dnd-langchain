@@ -30,9 +30,7 @@ io.on('connection', (socket) => {
 })
 
 app.get('/', async (req: Request, res: Response) => {
-  res.status(200).send({
-    message: 'Hello!',
-  })
+  res.status(200).send({ message: 'Hello!' })
 })
 // Setup end
 
