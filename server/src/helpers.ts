@@ -1,5 +1,11 @@
 export const generateSDImage = async (prompt: string): Promise<string> => {
   if (!prompt) return ''
+  prompt = prompt
+    .toLowerCase()
+    .replaceAll(
+      'protagonist',
+      'dwarf wizard wearing a gray hat and a red cloak wielding a wooden staff',
+    )
 
   try {
     const sdPayload = {
@@ -7,6 +13,7 @@ export const generateSDImage = async (prompt: string): Promise<string> => {
       negative_prompt:
         '(signature:1.5), (text:1.5), (letters:1.5), (watermark:1.5), deformed eyes, ((disfigured)), ((bad art)), ((deformed)), ((extra limbs)), (((duplicate))), ((morbid)), ((mutilated)), out of frame, extra fingers, mutated hands, poorly drawn eyes, ((poorly drawn hands)), ((poorly drawn face)), (((mutation))), ((ugly)), blurry, ((bad anatomy)), (((bad proportions))), cloned face, body out of frame, out of frame, bad anatomy, gross proportions, (malformed limbs), ((missing arms)), ((missing legs)), (((extra arms))), (((extra legs))), (fused fingers), (too many fingers), (((long neck))), tiling, poorly drawn, mutated, cross-eye, canvas frame, frame, cartoon, 3d, weird colors, blurry',
       steps: 20,
+      width: 768,
       sampler_name: 'DPM++ 2M Karras',
     }
 

@@ -6,28 +6,75 @@
 .gameWindow {
   width: 1280px;
   height: 720px;
+  outline: 1px solid white;
+  position: relative;
+  padding: 30px;
   display: flex;
   flex-direction: row;
-  outline: 1px solid white;
+  gap: 40px;
+}
+
+.contentWrapper {
+  border-radius: 20px;
+  overflow: hidden;
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  flex: 2;
+  height: 100%;
+  backdrop-filter: blur(10px);
+}
+
+.imageWrapper {
+  position: relative;
+  height: 70%;
+  border-bottom: 1px solid white;
 }
 
 .gameWindow ul {
   list-style: none;
-  padding: 0;
-  margin: 0;
 }
 
 .gameText {
-  padding: 20px;
+  padding: 15px;
   width: 100%;
+  height: 30%;
+}
+
+.gameText p {
+  text-shadow: 1px 1px 1px black, 0 0 2px black;
+  height: 100%;
 }
 
 .voteCount {
-  margin-right: 10px;
+  padding: 0 40px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 .voteLetter {
   text-transform: uppercase;
+}
+
+.voteOptionContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 22px;
+}
+
+.voteContainer {
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-align: center;
+}
+
+.optionContainer {
+  height: 30%;
+  display: flex;
+  align-items: center;
 }
 
 /* @media (min-width: 700px) {

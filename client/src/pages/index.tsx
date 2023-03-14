@@ -1,11 +1,13 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { Almendra, Roboto } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { useEffect, useState } from 'react'
 import { io, Socket } from 'Socket.IO-client'
+import bgImage from '../../public/bg.png'
 
-const inter = Inter({ subsets: ['latin'] })
+const almendraFont = Almendra({ weight: '400', subsets: ['latin'] })
+const robotoFont = Roboto({ weight: '400', subsets: ['latin'] })
 let socket: Socket
 
 type GameState = {
@@ -16,6 +18,9 @@ type GameState = {
 
 export default function Home() {
   const [inputValue, setInputValue] = useState('')
+  const [fontSize, setFontSize] = useState(24)
+  const [hasGameStarted, setHasGameStarted] = useState(false)
+  const [fontSizeCalculationDone, setFontSizeCalculationDone] = useState(true)
   const [timeLeft, setTimeLeft] = useState(0)
   type VoteOptions = 'a' | 'b' | 'c'
   const [votes, setVotes] = useState<{ [key in VoteOptions]: number }>({
@@ -33,13 +38,31 @@ export default function Home() {
   const [currentGameState, setCurrentGameState] = useState<GameState>({
     description: 'Welcome to AI D&D',
     options: ['Sit back', 'Relax', 'Enjoy'],
+    // description:
+    //   "You continue to walk towards the ruin, and as you get closer, you notice the trees around you are becoming more and more scarce. Soon, you find yourself standing in front of the entrance to the ruin. The ruin is an old tower, covered in vines and moss, and it looks like it's been abandoned for a long time. You can hear the sound of rustling leaves coming from inside.",
+    // options: [
+    //   'Enter the tower and head up the staircase lol',
+    //   'Cast a frost nova spell to make sure there are no enemies inside',
+    //   'Search the area around the tower for any other entrances',
+    // ],
     image: fallbackImage,
   })
+
+  useEffect(() => {
+    const content = document.getElementById('description-text-content')
+    if (content!.scrollHeight > content!.clientHeight && fontSize > 0) {
+      setFontSize((fontSize) => fontSize - 1)
+      setFontSizeCalculationDone(false)
+    } else {
+      setFontSizeCalculationDone(true)
+    }
+  }, [fontSize])
 
   useEffect(() => {
     socket = io('http://localhost:5000')
 
     const onUpdateGameState = (newState: GameState) => {
+      setHasGameStarted(true)
       console.log('newState :>> ', newState)
       setCurrentGameState(newState)
     }
@@ -86,33 +109,82 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
+      <main className={`${styles.main} ${almendraFont.className}`}>
         <div className={styles.gameWindow}>
           <Image
-            src={currentGameState.image || fallbackImage}
-            alt="stable diffusion image"
-            width={720}
-            height={720}
-            priority
+            alt="bg image"
+            src={bgImage}
+            placeholder="blur"
+            quality={100}
+            fill
+            sizes="100vw"
+            style={{ objectFit: 'cover', zIndex: -1, opacity: 0.4 }}
           />
-          <div className={styles.gameText}>
-            <h1>{currentGameState.description}</h1>
-            <ul>
-              {currentGameState.options.map((option, index) => {
-                const letter = letters[index] as VoteOptions
-                const voteCount = votes[letter] || 0
 
-                return (
-                  <li key={index}>
-                    <span className={styles.voteCount}>({voteCount})</span>
-                    <span className={styles.voteLetter}>
-                      {letters[index]}
-                    </span>: {option}
-                  </li>
-                )
-              })}
-            </ul>
-            <p>vote ends in: {timeLeft} seconds</p>
+          <div className={styles.contentWrapper}>
+            <div className={styles.imageWrapper}>
+              <Image
+                src={currentGameState.image || fallbackImage}
+                alt="stable diffusion image"
+                fill
+                priority
+                style={{ objectFit: 'cover', objectPosition: 'center top' }}
+              />
+            </div>
+            <div className={styles.gameText}>
+              <p
+                id="description-text-content"
+                style={{
+                  fontSize: `${fontSize}px`,
+                  opacity: fontSizeCalculationDone ? 1 : 0,
+                }}
+                className={robotoFont.className}
+              >
+                {currentGameState.description}
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.voteOptionContainer}>
+            <div
+              style={{ opacity: hasGameStarted ? 1 : 0 }}
+              className={styles.voteContainer}
+            >
+              <ul className={styles.voteCount}>
+                {letters.map((letter) => {
+                  const voteCount = votes[letter as VoteOptions] || 0
+
+                  return (
+                    <li key={letter}>
+                      <span>
+                        {letter.toUpperCase()} ({voteCount})
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+
+              <p>
+                {timeLeft > 0
+                  ? `Voting ends in: ${timeLeft} seconds`
+                  : 'Voting closed'}
+              </p>
+            </div>
+
+            <div className={styles.optionContainer}>
+              <ul className={styles.voteOptions}>
+                {currentGameState.options.map((option, index) => {
+                  return (
+                    <li key={index}>
+                      <span className={styles.voteLetter}>
+                        {letters[index]}
+                      </span>
+                      : {option}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           </div>
         </div>
 
