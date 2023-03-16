@@ -22,11 +22,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected')
   })
-
-  // socket.on('newPlayerChoice', (newPlayerChoice) => {
-  //   console.log('New player choice :>> ', newPlayerChoice)
-  //   gameInstance.generateNextScene(newPlayerChoice)
-  // })
 })
 
 app.get('/', async (req: Request, res: Response) => {
@@ -39,7 +34,7 @@ app.post('/', async (req: Request, res: Response) => {
   try {
     console.log('body req', req.body)
 
-    gameInstance.start()
+    gameInstance.init()
 
     res.status(200).send({ res: 'success' })
   } catch (err) {

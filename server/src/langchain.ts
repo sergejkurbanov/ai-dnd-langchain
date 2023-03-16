@@ -19,6 +19,7 @@ export const callChatGPT = async ({
     description: string
     options: string[]
     dallePrompt: string
+    isDone: boolean
   }
   text: string
 }> => {
@@ -54,6 +55,7 @@ export const callChatGPT = async ({
         description: 'Oops, something went wrong. Let me take a look!',
         options: [],
         dallePrompt: '',
+        isDone: true,
       },
       text: 'Oops, something went wrong. Let me take a look!',
     }

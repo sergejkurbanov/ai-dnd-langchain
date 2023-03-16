@@ -56,7 +56,7 @@ export default function Home() {
     } else {
       setFontSizeCalculationDone(true)
     }
-  }, [fontSize])
+  }, [currentGameState.description, fontSize])
 
   useEffect(() => {
     socket = io('http://localhost:5000')
