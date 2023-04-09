@@ -1,3 +1,12 @@
+import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk'
+import { SpeechSynthesizer } from 'microsoft-cognitiveservices-speech-sdk'
+import * as readline from 'readline'
+import * as fs from 'fs'
+import player from 'play-sound'
+import * as dotenv from 'dotenv'
+
+dotenv.config()
+
 export const generateSDImage = async (prompt: string): Promise<string> => {
   if (!prompt) return ''
   prompt = prompt
@@ -30,3 +39,59 @@ export const generateSDImage = async (prompt: string): Promise<string> => {
     return ''
   }
 }
+
+export const generateSpeech = async (text: string): Promise<void> => {
+  console.log('Generating speech from', text)
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
+    process.env.SPEECH_KEY!,
+    process.env.SPEECH_REGION!,
+  )
+  speechConfig.speechSynthesisLanguage = 'en-US' // is ignored in favor of the voice name
+  speechConfig.speechSynthesisVoiceName = 'en-US-AriaNeural'
+  const audioConfig = SpeechSDK.AudioConfig.fromAudioFileOutput('./file.wav')
+
+  const speechSynthesizer = new SpeechSynthesizer(speechConfig, audioConfig)
+
+  console.log('gonna gen')
+
+  const pitchXml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+<voice name="en-US-AmberNeural">
+  <prosody pitch="+10%">${text}</prosody>
+  </voice>
+</speak>`
+
+  console.log('pitchXml :>> ', pitchXml)
+
+  const ttsPromise = new Promise((resolve, reject) => {
+    speechSynthesizer.speakSsmlAsync(
+      pitchXml,
+      (result) => {
+        speechSynthesizer.close()
+        if (result) {
+          console.log('result.audioData :>> ', result.audioData)
+          resolve(result.audioData)
+        }
+      },
+      (error) => {
+        speechSynthesizer.close()
+        console.error(error)
+        reject(error)
+      },
+    )
+  })
+
+  const res = await ttsPromise
+  console.log('done gen, res', res)
+
+  const myPlayer = player()
+  myPlayer.play('./file.wav', function (err) {
+    console.log('err playing :>> ', err)
+
+    if (err) throw err
+  })
+}
+
+// generateSpeech('Haha Now you are just making me angry!')
+// generateSpeech('Hi guys! I am Illidan, rawr! Uwu.')
+
+console.log('helprs')
