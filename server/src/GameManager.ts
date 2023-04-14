@@ -141,7 +141,7 @@ const GameManager = (io: Server) => {
 
     const { json, text } = await callChatGPT({ systemMessage, history })
     const sdImage = await generateSDImage(json.dallePrompt)
-    // const speechResult = await generateSpeech(json.description)
+    const speechResult = await generateSpeech(json.description)
 
     history.push(text)
     options = json.options

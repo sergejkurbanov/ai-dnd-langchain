@@ -1,1 +1,4 @@
 node_modules/
+server/src/audio.wav
+server/file.wav
+server/python-tts.wav

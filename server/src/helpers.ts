@@ -27,6 +27,7 @@ export const generateSDImage = async (prompt: string): Promise<string> => {
     }
 
     const sdRes = await fetch('http://127.0.0.1:7861/sdapi/v1/txt2img', {
+      // Post to a locally running Stable Diffusion instance
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(sdPayload),
@@ -52,15 +53,13 @@ export const generateSpeech = async (text: string): Promise<void> => {
 
   const speechSynthesizer = new SpeechSynthesizer(speechConfig, audioConfig)
 
-  console.log('gonna gen')
-
   const pitchXml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
 <voice name="en-US-AmberNeural">
   <prosody pitch="+10%">${text}</prosody>
   </voice>
 </speak>`
 
-  console.log('pitchXml :>> ', pitchXml)
+  // console.log('pitchXml :>> ', pitchXml)
 
   const ttsPromise = new Promise((resolve, reject) => {
     speechSynthesizer.speakSsmlAsync(
@@ -68,7 +67,6 @@ export const generateSpeech = async (text: string): Promise<void> => {
       (result) => {
         speechSynthesizer.close()
         if (result) {
-          console.log('result.audioData :>> ', result.audioData)
           resolve(result.audioData)
         }
       },
@@ -80,18 +78,29 @@ export const generateSpeech = async (text: string): Promise<void> => {
     )
   })
 
-  const res = await ttsPromise
-  console.log('done gen, res', res)
+  await ttsPromise
 
   const myPlayer = player()
   myPlayer.play('./file.wav', function (err) {
-    console.log('err playing :>> ', err)
-
-    if (err) throw err
+    if (err) {
+      console.log('err playing :>> ', err)
+      throw err
+    }
   })
 }
 
-// generateSpeech('Haha Now you are just making me angry!')
-// generateSpeech('Hi guys! I am Illidan, rawr! Uwu.')
+const testTts = async () => {
+  // Test a locally running python server with a POST endpoint at /create_sound
+  const res = await fetch('http://127.0.0.1:8000/create_sound', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: 'Hello world!' }),
+  })
+  const resJson = await res.json()
 
-console.log('helprs')
+  console.log('res :>> ', res, resJson)
+
+  return resJson
+}
+
+// testTts()
