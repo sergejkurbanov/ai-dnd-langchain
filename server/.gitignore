@@ -108,3 +108,5 @@ backend/.env
 frontend/.env
 
 backend/dist/
+
+__pycache__/

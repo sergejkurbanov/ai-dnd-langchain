@@ -1,8 +1,10 @@
-# AI D&D
+# AI D&D + Langchain
 
-AI D&D is a full-stack javascript project that allows players to experience endless D&D adventures!
+AI D&D is a full-stack javascript project that allows twitch viewers to experience endless D&D adventures!
 
-## Features
+Additionally, this repo contains various Langchain experiments like a live voice assistant built on Whisper and Azure TTS services or a PDF NLP querying tool utilizing Pinecone and GPT.
+
+## AI D&D Features
 
 - generating images with Stable Diffusion
 
